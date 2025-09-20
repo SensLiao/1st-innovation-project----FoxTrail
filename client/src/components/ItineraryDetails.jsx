@@ -2,35 +2,46 @@ import { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 
 function formatTimeRange(startTime, endTime) {
-  if (!startTime && !endTime) return 'Flexible timing';
-  const start = startTime ? dayjs(startTime).format('MMM D, HH:mm') : 'TBD';
-  const end = endTime ? dayjs(endTime).format('HH:mm') : 'TBD';
+  if (!startTime && !endTime) return '时间灵活';
+  const start = startTime ? dayjs(startTime).format('M月D日 HH:mm') : '待定';
+  const end = endTime ? dayjs(endTime).format('HH:mm') : '待定';
   return `${start} - ${end}`;
 }
 
 function formatDayLabel(day) {
-  if (!day) return 'Flexible day';
-  return `Day ${day}`;
+  if (!day) return '日期待定';
+  return `第${day}天`;
 }
 
 const categoryLabels = {
-  general: 'General',
-  culture: 'Culture',
-  food: 'Food',
-  nature: 'Nature',
-  productivity: 'Productivity',
-  commute: 'Commute'
+  general: '通用',
+  culture: '文化',
+  food: '美食',
+  nature: '自然',
+  productivity: '效率',
+  commute: '通勤'
 };
 
 const travelModeLabels = {
-  walk: 'Walk',
-  'public-transit': 'Public transit',
-  drive: 'Drive',
-  bike: 'Bike'
+  walk: '步行',
+  'public-transit': '公共交通',
+  drive: '驾车',
+  bike: '骑行'
 };
 
 function formatTravelMode(mode) {
-  return travelModeLabels[mode] || 'Flexible travel';
+  return travelModeLabels[mode] || '交通灵活';
+}
+
+const typeLabels = {
+  trip: '旅行',
+  daily: '日常',
+  commute: '通勤',
+  custom: '自定义'
+};
+
+function formatType(type) {
+  return typeLabels[type] || typeLabels.custom;
 }
 
 export default function ItineraryDetails({ itinerary, loading, onOptimize, onSync, onDeleteItem }) {
@@ -57,7 +68,7 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
     if (!shareLink) return;
 
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
-      console.warn('Clipboard API unavailable in this environment');
+      console.warn('当前环境不支持剪贴板 API');
       setCopied(false);
       return;
     }
@@ -66,7 +77,7 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
       await navigator.clipboard.writeText(shareLink);
       setCopied(true);
     } catch (error) {
-      console.error('Failed to copy share link', error);
+      console.error('复制分享链接失败', error);
       setCopied(false);
     }
   };
@@ -109,9 +120,9 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
     return (
       <div className="panel stretch">
         <div className="panel-header">
-          <h2>Itinerary details</h2>
+          <h2>行程详情</h2>
         </div>
-        <p className="empty">Select or generate an itinerary to review activities.</p>
+        <p className="empty">请选择或生成一个行程以查看安排。</p>
       </div>
     );
   }
@@ -121,7 +132,7 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
   const durationDays = itinerary.startDate && itinerary.endDate
     ? dayjs(itinerary.endDate).diff(dayjs(itinerary.startDate), 'day') + 1
     : null;
-  const itinerarySummary = itinerary.preferences?.aiSummary || 'Custom itinerary';
+  const itinerarySummary = itinerary.preferences?.aiSummary || '自定义行程';
 
   return (
     <div className="panel stretch" aria-busy={loading}>
@@ -129,51 +140,51 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
         <div>
           <h2>{itinerary.title}</h2>
           <p className="panel-subtitle">
-            {itinerary.destination || 'No destination'} · {itinerarySummary}
+            {itinerary.destination || '未填写目的地'} · {itinerarySummary}
           </p>
         </div>
         <div className="panel-actions">
           <button type="button" className="secondary" onClick={() => onOptimize(itinerary.id)}>
-            Optimise order
+            优化顺序
           </button>
           <button type="button" className="secondary" onClick={() => onSync(itinerary.id)}>
-            Sync calendar
+            同步到日历
           </button>
         </div>
       </div>
 
       <div className="summary-grid">
         <div>
-          <span className="label">Schedule</span>
+          <span className="label">时间安排</span>
           <strong>{formatTimeRange(itinerary.startDate, itinerary.endDate)}</strong>
         </div>
         <div>
-          <span className="label">Type</span>
-          <strong className={`badge badge-${itinerary.type}`}>{itinerary.type}</strong>
+          <span className="label">类型</span>
+          <strong className={`badge badge-${itinerary.type}`}>{formatType(itinerary.type)}</strong>
         </div>
         <div>
-          <span className="label">Duration</span>
-          <strong>{durationDays ? `${durationDays} ${durationDays > 1 ? 'days' : 'day'}` : 'Flexible'}</strong>
+          <span className="label">持续时间</span>
+          <strong>{durationDays ? `${durationDays} 天` : '时间灵活'}</strong>
         </div>
         <div>
-          <span className="label">Activities</span>
+          <span className="label">活动数量</span>
           <strong>{totalActivities}</strong>
         </div>
         <div className="share-link">
-          <span className="label">Share link</span>
+          <span className="label">分享链接</span>
           <a href={shareLink} onClick={(event) => event.preventDefault()}>{shareLink}</a>
           <button type="button" className="ghost" onClick={handleCopyShareLink} disabled={!shareLink}>
-            {copied ? 'Copied!' : 'Copy link'}
+            {copied ? '已复制！' : '复制链接'}
           </button>
         </div>
         <div>
-          <span className="label">Collaborators</span>
+          <span className="label">协作者</span>
           <strong>{collaboratorCount}</strong>
         </div>
       </div>
 
       <div className="timeline">
-        <h3>Schedule</h3>
+        <h3>日程安排</h3>
         <ul>
           {itinerary.items.map((item) => {
             const category = item.category || 'general';
@@ -188,7 +199,7 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
                   <h4>{item.name}</h4>
                   {item.location && <p>{item.location}</p>}
                   <div className="timeline-tags">
-                    <span className={`badge badge-category-${category}`}>{categoryLabels[category] || 'General'}</span>
+                    <span className={`badge badge-category-${category}`}>{categoryLabels[category] || '通用'}</span>
                     <span className="badge badge-outline">{formatTravelMode(item.travelMode)}</span>
                   </div>
                   {item.notes && <p className="notes">{item.notes}</p>}
@@ -198,16 +209,16 @@ export default function ItineraryDetails({ itinerary, loading, onOptimize, onSyn
                     type="button"
                     className="danger-link"
                     onClick={() => onDeleteItem(itinerary.id, item.id)}
-                    aria-label={`Remove ${item.name}`}
+                    aria-label={`删除 ${item.name}`}
                   >
-                    Remove
+                    删除
                   </button>
                 </div>
               </li>
             );
           })}
         </ul>
-        {itinerary.items.length === 0 && <p className="empty">No activities yet. Add one below.</p>}
+        {itinerary.items.length === 0 && <p className="empty">暂时没有活动，请前往“添加活动”页面。</p>}
       </div>
     </div>
   );
