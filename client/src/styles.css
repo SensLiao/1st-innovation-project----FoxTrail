@@ -105,6 +105,32 @@ body {
   font-weight: 500;
 }
 
+.app-nav {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.app-nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.app-nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.app-nav-link.active {
+  background: rgba(255, 255, 255, 0.32);
+  color: #0f172a;
+}
+
 .status {
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
@@ -125,11 +151,19 @@ body {
   background: rgba(248, 113, 113, 0.3);
 }
 
+.app-main {
+  flex: 1;
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 1.5rem;
   padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.layout.single-column {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .column {

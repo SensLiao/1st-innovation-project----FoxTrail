@@ -1,15 +1,22 @@
 import dayjs from 'dayjs';
 
 function formatDateRange(startDate, endDate) {
-  if (!startDate || !endDate) return 'Unscheduled';
-  const start = dayjs(startDate).format('MMM D');
-  const end = dayjs(endDate).format('MMM D, YYYY');
+  if (!startDate || !endDate) return '未安排时间';
+  const start = dayjs(startDate).format('M月D日');
+  const end = dayjs(endDate).format('YYYY年M月D日');
   return `${start} → ${end}`;
 }
 
+const typeLabels = {
+  trip: '旅行',
+  daily: '日常',
+  commute: '通勤',
+  custom: '自定义',
+};
+
 function formatType(type) {
-  if (!type) return 'Custom';
-  return type.charAt(0).toUpperCase() + type.slice(1);
+  if (!type) return typeLabels.custom;
+  return typeLabels[type] || typeLabels.custom;
 }
 
 export default function ItineraryList({ itineraries, selectedId, onSelect, loading }) {
@@ -18,8 +25,8 @@ export default function ItineraryList({ itineraries, selectedId, onSelect, loadi
   return (
     <div className="panel" aria-busy={loading}>
       <div className="panel-header">
-        <h2>Itineraries</h2>
-        <p className="panel-subtitle">Manage personal, study and travel plans.</p>
+        <h2>行程列表</h2>
+        <p className="panel-subtitle">管理个人、学习与旅行计划。</p>
       </div>
       <ul className="itinerary-list">
         {loading
@@ -48,7 +55,7 @@ export default function ItineraryList({ itineraries, selectedId, onSelect, loadi
                     <span className="itinerary-meta">
                       <span className={`badge badge-${typeKey}`}>{formatType(itinerary.type)}</span>
                       <span>{formatDateRange(itinerary.startDate, itinerary.endDate)}</span>
-                      <span className="itinerary-count">{activityCount} activities</span>
+                      <span className="itinerary-count">{activityCount} 个活动</span>
                     </span>
                     {itinerary.destination && <span className="itinerary-destination">{itinerary.destination}</span>}
                   </button>
@@ -56,7 +63,7 @@ export default function ItineraryList({ itineraries, selectedId, onSelect, loadi
               );
             })}
       </ul>
-      {isEmpty && <p className="empty">No itineraries yet. Create one below.</p>}
+      {isEmpty && <p className="empty">还没有行程，请先新建。</p>}
     </div>
   );
 }
