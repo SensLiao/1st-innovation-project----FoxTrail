@@ -17,9 +17,16 @@ export default function NewItineraryForm({ onCreate, loading }) {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    onCreate(form).then(() => setForm(defaultState));
+    if (loading) return;
+
+    try {
+      await onCreate(form);
+      setForm(defaultState);
+    } catch (error) {
+      console.error('Unable to create itinerary', error);
+    }
   };
 
   return (

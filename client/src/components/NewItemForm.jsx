@@ -13,22 +13,36 @@ const initialState = {
 
 export default function NewItemForm({ onAdd, disabled }) {
   const [form, setForm] = useState(initialState);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (disabled || submitting) return;
+
+    setSubmitting(true);
     const payload = {
       ...form,
       day: form.day ? Number(form.day) : null,
       startTime: form.startTime ? new Date(form.startTime).toISOString() : null,
       endTime: form.endTime ? new Date(form.endTime).toISOString() : null
     };
-    onAdd(payload).then(() => setForm(initialState));
+
+    try {
+      await onAdd(payload);
+      setForm(initialState);
+    } catch (error) {
+      console.error('Unable to add itinerary item', error);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const isDisabled = disabled || submitting;
 
   return (
     <form className="form" onSubmit={handleSubmit}>
@@ -81,8 +95,8 @@ export default function NewItemForm({ onAdd, disabled }) {
         Notes
         <textarea name="notes" value={form.notes} onChange={handleChange} rows="2" placeholder="Remind everyone to bring prototypes." />
       </label>
-      <button type="submit" className="secondary" disabled={disabled}>
-        Add to itinerary
+      <button type="submit" className="secondary" disabled={isDisabled}>
+        {submitting ? 'Adding…' : 'Add to itinerary'}
       </button>
     </form>
   );
